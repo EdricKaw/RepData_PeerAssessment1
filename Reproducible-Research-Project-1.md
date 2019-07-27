@@ -188,6 +188,7 @@ g + geom_bar(stat="identity") +
     ggtitle("Total number of steps per day") +
     theme(plot.title= element_text(hjust= 0.5))
 ```
+https://raw.githubusercontent.com/EdricKaw/RepData_PeerAssessment1/master/plot1.png
 
 ![](Reproducible-Research-Project-1_files/figure-html/Histogram-1.png)<!-- -->
 
@@ -211,6 +212,7 @@ dev.off()
 ```r
 hist(activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day")
 ```
+https://raw.githubusercontent.com/EdricKaw/RepData_PeerAssessment1/master/plot2.png
 
 ![](Reproducible-Research-Project-1_files/figure-html/Frequency steps per day-1.png)<!-- -->
 
@@ -280,6 +282,8 @@ g1 + geom_line() +
      ggtitle("Average No. of Steps by Interval") +
      theme(plot.title = element_text(hjust = 0.5))
 ```
+
+https://raw.githubusercontent.com/EdricKaw/RepData_PeerAssessment1/master/plot3.png
 
 ![](Reproducible-Research-Project-1_files/figure-html/Time Series-1.png)<!-- -->
 
@@ -376,6 +380,7 @@ hist(impute_activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day", 
 hist(activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day", col="Blue" , add=T)
 legend("topright", c("Imputed Data", "Non-NA Data"), fill=c("Red", "Blue") )
 ```
+https://raw.githubusercontent.com/EdricKaw/RepData_PeerAssessment1/master/plot4.png
 
 ![](Reproducible-Research-Project-1_files/figure-html/histogram-1.png)<!-- -->
 
@@ -409,6 +414,7 @@ g2 + geom_line() +
      ylab("Average number of steps") +
      theme(plot.title = element_text(hjust = 0.5))
 ```
+https://raw.githubusercontent.com/EdricKaw/RepData_PeerAssessment1/master/plot5.png
 
 ![](Reproducible-Research-Project-1_files/figure-html/compare weekday and weekend-1.png)<!-- -->
 
