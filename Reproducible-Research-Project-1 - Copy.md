@@ -189,7 +189,7 @@ g + geom_bar(stat="identity") +
     theme(plot.title= element_text(hjust= 0.5))
 ```
 
-![](Reproducible-Research-Project-1_files/figure-html/Histogram-1.png)<!-- -->
+![](https://github.com/EdricKaw/RepData_PeerAssessment1/blob/master/plot1.png)<!-- -->
 
 
 ## 3.Mean and median number of steps taken each day  
