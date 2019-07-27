@@ -1,0 +1,196 @@
+---
+title: "Reproducible Research Project 1"
+author: "Edric Kaw"
+date: "7/27/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assignment Instructions
+
+1.Code for reading in the dataset and/or processing the data  
+2.Histogram of the total number of steps taken each day  
+3.Mean and median number of steps taken each day  
+4.Time series plot of the average number of steps taken  
+5.The 5-minute interval that, on average, contains the maximum number of steps  
+6.Code to describe and show a strategy for imputing missing data  
+7.Histogram of the total number of steps taken each day after missing values are imputed  
+8.Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+9.All of the R code needed to reproduce the results (numbers, plots, etc.) in the report  
+
+
+## 1. Code for reading in the dataset and/or processing the data
+
+```{r reading file and data processing, echo=TRUE}
+library(dplyr)
+library(lubridate)
+activity <- read.csv("activity.csv", header = TRUE ,sep=",")
+head(activity, n=10)
+tail(activity, n=10)
+activity$date <- ymd(activity$date)
+activity <- mutate(activity, date_1 = wday(activity$date, label=TRUE) )
+activity$date_2 <- as.factor(ifelse((activity$date_1) %in% c("Sat", "Sun"), "weekend", "weekday"))
+summary(activity)
+str(activity)
+
+```
+
+
+## 2.Histogram of the total number of steps taken each day  
+
+Aggregation of steps by date
+
+```{r aggregation, echo=TRUE}
+activity_ttl_steps <- aggregate(steps ~ date, data=activity, FUN=sum )
+head(activity_ttl_steps)
+```
+
+Histogram of steps per day
+
+```{r Histogram, echo=TRUE}
+library(ggplot2)
+png("plot1.png")
+g <- ggplot(activity_ttl_steps, aes(date, steps))
+g + geom_bar(stat="identity") +
+    xlab("Date") + 
+    ylab("Total number of steps") +
+    ggtitle("Total number of steps per day") +
+    theme(plot.title= element_text(hjust= 0.5))
+dev.off()
+g <- ggplot(activity_ttl_steps, aes(date, steps))
+g + geom_bar(stat="identity") +
+    xlab("Date") + 
+    ylab("Total number of steps") +
+    ggtitle("Total number of steps per day") +
+    theme(plot.title= element_text(hjust= 0.5))
+```
+
+
+## 3.Mean and median number of steps taken each day  
+
+Frequency of total number steps per day
+
+```{r Frequency steps per day}
+png("plot2.png")
+hist(activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day")
+dev.off()
+hist(activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day")
+
+```
+
+
+Descriptive statistic for steps by day
+
+```{r Mean/Median by day}
+summary(activity_ttl_steps$steps)
+as.integer(mean(activity_ttl_steps$steps))
+as.integer(median(activity_ttl_steps$steps))
+```
+
+
+## 4.Time series plot of the average number of steps taken  
+
+Aggregation of steps by interval
+
+```{r Agg Steps}
+activity_interval_steps <- aggregate(steps ~ interval, data=activity, FUN=mean)
+```
+
+Time Series plot
+
+```{r Time Series}
+png("plot3.png")
+g1 <- ggplot(activity_interval_steps, aes(interval, steps))
+g1 + geom_line() +
+     ylab("Average number of steps") +
+     xlab("Interval") +
+     ggtitle("Average No. of Steps by Interval") +
+     theme(plot.title = element_text(hjust = 0.5))
+dev.off()
+
+g1 <- ggplot(activity_interval_steps, aes(interval, steps))
+g1 + geom_line() +
+     ylab("Average number of steps") +
+     xlab("Interval") +
+     ggtitle("Average No. of Steps by Interval") +
+     theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+## 5.The 5-minute interval that, on average, contains the maximum number of steps 
+
+```{r Max. Steps by interval}
+max_steps <- max(activity_interval_steps$steps)
+activity_interval_steps[activity_interval_steps$steps == max_steps,"interval"]
+```
+
+
+## 6.Code to describe and show a strategy for imputing missing data  
+
+For strategy, Will using the mean of 5 minute interval to impute the missing values
+
+```{r Impute}
+NAdata <- activity[is.na(activity$steps),]
+Cleandata <- activity[is.na(activity$steps) == FALSE,]
+Meandata <- aggregate( steps ~interval , data=Cleandata, FUN=mean)
+
+Newdata <- merge( NAdata[,c("date","interval")], Meandata, by=c("interval") )
+Newdata <- Newdata[,c("steps","date","interval")]
+Newdata <- mutate(Newdata, date_1 = wday(Newdata$date, label=TRUE) )
+Newdata$date_2 <- as.factor(ifelse((Newdata$date_1) %in% c("Sat", "Sun"), "weekend", "weekday"))
+head(Newdata)
+
+mergedata <- rbind(Cleandata, Newdata) %>% arrange(date, interval)
+impute_activity_ttl_steps <- aggregate( steps ~ date, data=mergedata, FUN=sum)
+summary(impute_activity_ttl_steps$steps)
+as.integer(mean(impute_activity_ttl_steps$steps))
+as.integer(median(impute_activity_ttl_steps$steps))
+
+```
+
+The new mean of imputed data is 10766 steps compared to old mean of 10766 steps.
+The new median of imputed data is 10766 steps compared to old median of 10765 steps.
+However, the overall distribution is roughly the same.
+
+## 7.Histogram of the total number of steps taken each day after missing values are imputed  
+
+```{r histogram}
+png("plot4.png")
+hist(impute_activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day", col="Red")
+hist(activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day", col="Blue" , add=T)
+legend("topright", c("Imputed Data", "Non-NA Data"), fill=c("Red", "Blue") )
+dev.off()
+
+hist(impute_activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day", col="Red")
+hist(activity_ttl_steps$steps, xlab="Steps", main="Total Steps per Day", col="Blue" , add=T)
+legend("topright", c("Imputed Data", "Non-NA Data"), fill=c("Red", "Blue") )
+```
+
+## 8.Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
+```{r compare weekday and weekend}
+activity_interval_steps_2 <- aggregate(steps ~ interval + date_2, data=activity, FUN=mean)
+png("plot5.png")
+g2 <- ggplot(activity_interval_steps_2, aes(interval, steps, fill=date_2) )
+g2 + geom_line() + 
+     facet_grid(date_2~.) +
+     ggtitle("Mean of Steps by Interval Based on Weekday and Weekend") +
+     xlab("Interval") +
+     ylab("Average number of steps") +
+     theme(plot.title = element_text(hjust = 0.5))
+dev.off()
+
+g2 <- ggplot(activity_interval_steps_2, aes(interval, steps, fill=date_2) )
+g2 + geom_line() + 
+     facet_grid(date_2~.) +
+     ggtitle("Mean of Steps by Interval Based on Weekday and Weekend") +
+     xlab("Interval") +
+     ylab("Average number of steps") +
+     theme(plot.title = element_text(hjust = 0.5))
+```
+
+From the graph plotted, step activity differ between weekday and weekend.
+This may resulted from higher opportunity of getting activity on weekend compared to weekday.
